@@ -1,18 +1,17 @@
-from collections import defaultdict
 import heapq, csv
 
 dicGrafo = {
-    "Arad": ["Zerind", "Sibiu", "Timisoara"],
-    "Zerind": ["Arad","Oradea"],
-    "Sibiu": ["Arad", "Oradea", "Fagaras", "Rimnicu"],
+    "Arad":["Zerind", "Sibiu", "Timisoara"],
+    "Zerind":["Arad", "Oradea"],
+    "Sibiu":["Arad", "Oradea", "Fagaras", "Rimnicu-Vilcea"],
     "Timisoara": ["Arad", "Lugoj"],
     "Oradea": ["Zerind", "Sibiu"],
     "Fagaras": ["Sibiu", "Bucharest"],
-    "Rimnicu": ["Vilcea", "Sibiu", "Pitesti", "Craiova"],
+    "Rimnicu-Vilcea": ["Sibiu", "Pitesti", "Craiova"],
     "Lugoj": ["Timisoara", "Mehadia"],
     "Bucharest": ["Fagaras", "Pitesti", "Urziceni", "Giurgiu"],
-    "Pitesti": ["Rimnicu", "Bucharest", "Craiova"],
-    "Craiova": ["Rimnicu", "Pitesti", "Dobretu"],
+    "Pitesti": ["Rimnicu-Vilcea", "Bucharest", "Craiova"],
+    "Craiova": ["Rimnicu-Vilcea", "Pitesti", "Dobretu"],
     "Mehadia": ["Lugoj", "Dobretu"],
     "Urziceni": ["Bucharest", "Hirsova", "Vaslui"],
     "Giurgiu": ["Bucharest"],
@@ -22,7 +21,6 @@ dicGrafo = {
     "Eforie": ["Hirsova"],
     "Iasi": ["Vaslui", "Neamt"],
     "Neamt": ["Iasi"]
-
 }
 
 class PriorityQueue:
@@ -132,7 +130,7 @@ class Grafo(object):
         caminho.pop(-1)
         return caminho
 
-    def distancia_arestas(self, inicial, final):
+    def cost(self, inicial, final):
         with open('data\edges2.csv', 'r') as distancia_arestas:
             reader = csv.reader(distancia_arestas)
             for linha in reader:
@@ -144,11 +142,19 @@ class Grafo(object):
                         return int(linha[2])
         return 0
 
-    def heuristica(self, a, b):
-        (x1, y1) = a
-        (x2, y2) = b
-        return abs(x1 - x2) + abs(y1 - y2)
-
+    def heuristica(self, inicial, final):
+        with open('data\Heuristic2.csv', 'r') as distancia_arestas:
+            reader = csv.reader(distancia_arestas)
+            lista_linhas = list(reader)
+            for linha in range(len(lista_linhas)):
+                if lista_linhas[linha][0] == inicial:
+                    for coluna in range(len(lista_linhas[0])):
+                        if lista_linhas[0][coluna] == final:
+                            if lista_linhas[linha][coluna] != "":
+                                return lista_linhas[linha][coluna]
+                            else:
+                                return lista_linhas[coluna][linha]
+        return 0
 
     def a_star_search(self, start, goal):
         frontier = PriorityQueue()
@@ -168,11 +174,11 @@ class Grafo(object):
                 new_cost = cost_so_far[current] + grafo.cost(current, next)
                 if next not in cost_so_far or new_cost < cost_so_far[next]:
                     cost_so_far[next] = new_cost
-                    priority = new_cost + self.heuristica(goal, next)
+                    priority = new_cost + float(self.heuristica(goal, next))
                     frontier.put(next, priority)
                     came_from[next] = current
 
-        return came_from, cost_so_far
+        return list(came_from.keys())#, cost_so_far    # <-- descomente este trecho, caso queira exibir também os custos do caminho
 
 
     def __str__(self):
@@ -180,9 +186,12 @@ class Grafo(object):
 
 
 grafo = Grafo(dicGrafo, direcionado=True)
-print("busca em Largura: ", grafo.busca_em_Largu("Arad", "Rimnicu"))
-print("busca em profundidade: ", grafo.busca_profunda("Arad", "Rimnicu"))
-print("busca com A*: ", grafo.a_star_search("Arad", "Rimnicu"))
+
+
+# alguns desses prints estão agora no arquivo InterfaceGrafica.py
+# print("busca em Largura: ", grafo.busca_em_Largu("Arad", "Bucharest"))
+# print("busca em profundidade: ", grafo.busca_profunda("Arad", "Bucharest"))
+# print("busca com A*: ", grafo.a_star_search("Arad", "Bucharest"))
 # print(grafo._grafo,"\n")
 # print(grafo.get_vertices())
 # print(grafo.eh_conectado("Ar", "Pi"))
