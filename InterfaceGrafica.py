@@ -11,9 +11,13 @@ def bt_click():
     text_resultado_busca_em_profundidade.delete('1.0', END)
     text_resultado_busca_com_A_estrela.delete('1.0', END)
 
-    text_resultado_busca_em_largura.insert(END, grafo.busca_em_Largu(combo1.get(), combo2.get()))
+    text_resultado_busca_em_largura.insert(END, grafo.busca_em_largura(combo1.get(), combo2.get()))
     text_resultado_busca_em_profundidade.insert(END, grafo.busca_profunda(combo1.get(), combo2.get()))
     text_resultado_busca_com_A_estrela.insert(END, grafo.a_star_search(combo1.get(), combo2.get()))
+
+    plota_largura(grafo_nx, combo1.get(), combo2.get())
+    plota_profundidade(grafo_nx, combo1.get(), combo2.get())
+    plota_A_estrela(grafo_nx, combo1.get(), combo2.get())
 
     global vertice_inicial
     global vertice_final
@@ -23,26 +27,7 @@ def bt_click():
 janela = Tk()
 janela.title("SmartSearch")
 
-values = ["Arad",
-          "Bucharest",
-          "Craiova",
-          "Dobretu",
-          "Eforie",
-          "Fagaras",
-          "Giurgiu",
-          "Hirsova",
-          "Iasi",
-          "Logoj",
-          "Mehadia",
-          "Neamt",
-          "Oradea",
-          "Pitesti",
-          "Rimnicu-Vilcea",
-          "Sibiu",
-          "Timisoara",
-          "Urziceni",
-          "Vaslui",
-          "Zerind"]
+values = list(dicGrafo.keys())
 
 lb_inicial = Label(janela, text="Local inicial:")
 lb_inicial.place(x=20, y=20)
@@ -81,6 +66,6 @@ janela.geometry("900x500+200+100")
 janela.mainloop()
 
 # esses prints sevem para printar o resultado no terminal, mesmo depois de executar a interface gráfica
-print("busca em Largura: ", grafo.busca_em_Largu(vertice_inicial, vertice_final))
+print("busca em Largura: ", grafo.busca_em_largura(vertice_inicial, vertice_final))
 print("busca em profundidade: ", grafo.busca_profunda(vertice_inicial, vertice_final))
 print("busca com A*: ", grafo.a_star_search(vertice_inicial, vertice_final))

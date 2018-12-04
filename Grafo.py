@@ -1,6 +1,8 @@
 import heapq, csv
+import networkx as nx
+import matplotlib.pyplot as plt
 
-dicGrafo = {
+'''dicGrafo = {
     "Arad":["Zerind", "Sibiu", "Timisoara"],
     "Zerind":["Arad", "Oradea"],
     "Sibiu":["Arad", "Oradea", "Fagaras", "Rimnicu-Vilcea"],
@@ -21,7 +23,68 @@ dicGrafo = {
     "Eforie": ["Hirsova"],
     "Iasi": ["Vaslui", "Neamt"],
     "Neamt": ["Iasi"]
-}
+}'''
+
+def create_graph(roat):
+    """ Criar grafo """
+
+    cities = open(roat)
+    dicGrafo = {}
+
+    for line in cities:
+        line = line.replace("\n", "")
+        data = line.split(",")
+        key = data.pop(0)
+        dicGrafo[key] = data
+
+    return dicGrafo
+
+def paint_edges(graph, pos, route, color):
+    """Função auxiliar que pinta as arestas e os pontos de início e destino no grafo"""
+    edges = [(route[n], route[n + 1]) for n in range(len(route) - 1)]
+    nx.draw_networkx_edges(graph, pos=pos, edgelist=edges, edge_color=color, width=2.0)
+    nx.draw_networkx_nodes(graph, pos, nodelist=[route[0], route[-1]], node_size=120, node_color='blue')
+
+def get_pos(graph):
+    """Carrega o posicionamento das arestas caso o mesmo exista,
+    caso contrário, é aplicado o layout spring do NetworkX"""
+
+    try:
+        coord = open('./data/coordinates.csv')
+        pos = {}
+        for line in coord:
+            line.replace("\n", "")
+            line = line.split(",")
+            pos[line[0]] = (float(line[1]), float(line[2]))
+
+    except:
+        pos = nx.spring_layout(graph)
+
+    return pos
+
+def plota_largura(grafo_nx, inicio, fim):
+    pos = get_pos(grafo_nx)
+    nx.draw_networkx_nodes(grafo_nx, pos, node_size=40, node_color='green')
+    nx.draw_networkx_edges(grafo_nx, pos)
+    nx.draw_networkx_labels(grafo_nx, pos)
+    paint_edges(grafo_nx, pos, grafo.busca_em_largura(inicio, fim), 'lime')
+    plt.show()
+
+def plota_profundidade(grafo_nx, inicio, fim):
+    pos = get_pos(grafo_nx)
+    nx.draw_networkx_nodes(grafo_nx, pos, node_size=40, node_color='green')
+    nx.draw_networkx_edges(grafo_nx, pos)
+    nx.draw_networkx_labels(grafo_nx, pos)
+    paint_edges(grafo_nx, pos, grafo.busca_profunda(inicio, fim), 'cyan')
+    plt.show()
+
+def plota_A_estrela(grafo_nx, inicio, fim):
+    pos = get_pos(grafo_nx)
+    nx.draw_networkx_nodes(grafo_nx, pos, node_size=40, node_color='green')
+    nx.draw_networkx_edges(grafo_nx, pos)
+    nx.draw_networkx_labels(grafo_nx, pos)
+    paint_edges(grafo_nx, pos, grafo.a_star_search(inicio, fim), 'red')
+    plt.show()
 
 class PriorityQueue:
     def __init__(self):
@@ -76,53 +139,93 @@ class Grafo(object):
 
         return u in self._grafo and v in self._grafo[u]
 
-    def create_graph(self, roat):
-        """ Criar grafo """
-
-        cities = open(roat)
 
 
-        for line in cities:
-            list = []
-            data = line.split(",")
-            key = data.pop(0)
-            list.append(data)
-            dicGrafo[key] = list
 
-
-    def busca_em_Largu(self, inicio, fim):
+    def width_Search(self, inicio, fim, marcado_param=None, fila_param=None):
         """ Width Search"""
 
-        marcados = [inicio]
-        fila = [inicio]
-        caminho = []
+        # marcados = [inicio]
+        # caminho = []
         # if vertice_at not in marcados:
 
-        while fila:
-            vertice = fila.pop(0)
-            caminho.append(vertice)
-            for i in self._grafo[vertice]:
-                if i not in marcados:
-                    marcados.append(i)
-                    fila.append(i)
-                if vertice == fim:
+        # while fila:
+        #     vertice = fila.pop(0)
+        #     caminho.append(vertice)
+        #     for i in self._grafo[vertice]:
+        #         if i not in marcados:
+        #             marcados.append(i)
+        #             fila.append(i)
+        #         if vertice == fim:
+        #             return caminho
+
+        caminho = []
+
+        if marcado_param == None:
+            marcado = []
+        else:
+            marcado = marcado_param
+
+        if fila_param == None:
+            fila = [inicio]
+        else:
+            fila = fila_param
+
+        if inicio not in caminho:
+            caminho.append(inicio)
+
+        if inicio not in marcado:
+            marcado.append(inicio)
+
+        vertice = fila.pop(0)
+
+        if self._grafo[vertice] == marcado:
+            resultado = grafo.width_Search(vertice, fim, marcado, fila)
+            if resultado[-1] == 0:
+                return caminho + resultado
+            else:
+                caminho.remove(vertice)
+
+        for i in self._grafo[vertice]:
+            if i not in marcado:
+                marcado.append(i)
+                caminho.append(i)
+                fila.append(i)
+                if i == fim:
+                    caminho.append(0)
                     return caminho
+                else:
+                    caminho.remove(i)
+                resultado = grafo.width_Search(fila[0], fim, marcado, fila)
+                if resultado[-1] == 0:
+                    return caminho + resultado
 
+        return caminho
 
-    def deep_Search(self, inicio, fim, marcados = []):
-        marcado = marcados
+    def busca_em_largura(self, inicio, fim):
+        caminho = grafo.width_Search(inicio, fim)
+        caminho.pop(-1)
+        return caminho
+
+    def deep_Search(self, inicio, fim, marcados=None):
+        if marcados == None:
+            marcado = []
+        else:
+            marcado = marcados
 
         if inicio not in marcado:
             marcado.append(inicio)
 
         for i in self._grafo[inicio]:
-            if i not in marcados:
-                marcados.append(i)
+            if i not in marcado:
+                marcado.append(i)
                 if i == fim:
                     marcado.append(0)
                     return marcado
                 if grafo.deep_Search(i, fim, marcado)[-1] == 0:
                     return marcado
+                else:
+                    marcado.remove(i)
         return marcado
 
     def busca_profunda(self, inicio, fim):
@@ -180,16 +283,18 @@ class Grafo(object):
 
         return list(came_from.keys())#, cost_so_far    # <-- descomente este trecho, caso queira exibir também os custos do caminho
 
-
     def __str__(self):
         return '{}({})'.format(self.__class__.__name__, dict(self._grafo))
 
+dicGrafo = create_graph("data\DicGrafo.csv")
 
 grafo = Grafo(dicGrafo, direcionado=True)
-
+grafo_nx = nx.Graph(nx.to_networkx_graph(dicGrafo))
 
 # alguns desses prints estão agora no arquivo InterfaceGrafica.py
-# print("busca em Largura: ", grafo.busca_em_Largu("Arad", "Bucharest"))
+# print("busca em Largura: ", grafo.busca_em_largura("Arad", "Bucharest"))
+# print("busca em profundidade: ", grafo.busca_profunda("Arad", "Bucharest"))
+# print("busca em profundidade: ", grafo.busca_profunda("Arad", "Bucharest"))
 # print("busca em profundidade: ", grafo.busca_profunda("Arad", "Bucharest"))
 # print("busca com A*: ", grafo.a_star_search("Arad", "Bucharest"))
 # print(grafo._grafo,"\n")
