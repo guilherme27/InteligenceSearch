@@ -13,7 +13,7 @@ def bt_click():
 
     text_resultado_busca_em_largura.insert(END, grafo.busca_em_largura(combo1.get(), combo2.get()))
     text_resultado_busca_em_profundidade.insert(END, grafo.busca_profunda(combo1.get(), combo2.get()))
-    text_resultado_busca_com_A_estrela.insert(END, grafo.a_star_search(combo1.get(), combo2.get()))
+    text_resultado_busca_com_A_estrela.insert(END, grafo.busca_com_A_search(combo1.get(), combo2.get()))
 
     plota_largura(grafo_nx, combo1.get(), combo2.get())
     plota_profundidade(grafo_nx, combo1.get(), combo2.get())

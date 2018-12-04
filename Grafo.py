@@ -177,9 +177,12 @@ class Grafo(object):
         if inicio not in marcado:
             marcado.append(inicio)
 
+        #fila = self._grafo[inicio]
+
         vertice = fila.pop(0)
 
         if self._grafo[vertice] == marcado:
+            marcado = []
             resultado = grafo.width_Search(vertice, fim, marcado, fila)
             if resultado[-1] == 0:
                 return caminho + resultado
@@ -233,16 +236,16 @@ class Grafo(object):
         caminho.pop(-1)
         return caminho
 
-    def cost(self, inicial, final):
+    def custo(self, inicial, final):
         with open('data\edges2.csv', 'r') as distancia_arestas:
             reader = csv.reader(distancia_arestas)
             for linha in reader:
                 if linha[0] == inicial:
                     if linha[1] == final:
-                        return int(linha[2])
+                        return float(linha[2])
                 elif linha[1] == inicial:
                     if linha[0] == final:
-                        return int(linha[2])
+                        return float(linha[2])
         return 0
 
     def heuristica(self, inicial, final):
@@ -254,34 +257,76 @@ class Grafo(object):
                     for coluna in range(len(lista_linhas[0])):
                         if lista_linhas[0][coluna] == final:
                             if lista_linhas[linha][coluna] != "":
-                                return lista_linhas[linha][coluna]
+                                return float(lista_linhas[linha][coluna])
                             else:
-                                return lista_linhas[coluna][linha]
+                                return float(lista_linhas[coluna][linha])
         return 0
 
-    def a_star_search(self, start, goal):
-        frontier = PriorityQueue()
-        frontier.put(start, 0)
-        came_from = {}
-        cost_so_far = {}
-        came_from[start] = None
-        cost_so_far[start] = 0
+    # def a_star_search(self, start, goal):
+    #     frontier = PriorityQueue()
+    #     frontier.put(start, 0)
+    #     came_from = {}
+    #     cost_so_far = {}
+    #     came_from[start] = None
+    #     cost_so_far[start] = 0
+    #
+    #     while not frontier.empty():
+    #         current = frontier.get()
+    #
+    #         if current == goal:
+    #             break
+    #
+    #         for next in grafo.get_neighbors(current):
+    #             new_cost = cost_so_far[current] + grafo.cost(current, next)
+    #             if next not in cost_so_far or new_cost < cost_so_far[next]:
+    #                 cost_so_far[next] = new_cost
+    #                 priority = new_cost + float(self.heuristica(goal, next))
+    #                 frontier.put(next, priority)
+    #                 came_from[next] = current
+    #
+    #     return list(came_from.keys())#, cost_so_far    # <-- descomente este trecho, caso queira exibir também os custos do caminho
 
-        while not frontier.empty():
-            current = frontier.get()
+    def A_star_search(self, inicio, fim, escolhas_param=None):
+        if escolhas_param == None:
+            escolhas = []
+        else:
+            escolhas = escolhas_param
 
-            if current == goal:
-                break
+        caminho = []
 
-            for next in grafo.get_neighbors(current):
-                new_cost = cost_so_far[current] + grafo.cost(current, next)
-                if next not in cost_so_far or new_cost < cost_so_far[next]:
-                    cost_so_far[next] = new_cost
-                    priority = new_cost + float(self.heuristica(goal, next))
-                    frontier.put(next, priority)
-                    came_from[next] = current
+        if inicio == fim:
+            caminho.append(fim)
+            caminho.append(0)
+            return caminho
 
-        return list(came_from.keys())#, cost_so_far    # <-- descomente este trecho, caso queira exibir também os custos do caminho
+        for i in grafo._grafo[inicio]:
+            escolha = []
+            escolha.append(i)
+            escolha.append(self.heuristica(i, fim) + self.custo(inicio, i))
+            escolhas.append(escolha)
+
+        menor = escolhas[0]
+
+        for i in range(len(escolhas) - 1):
+            if escolhas[i + 1] != None:
+                if menor[1] > float(escolhas[i + 1][1]):
+                    menor = escolhas[i + 1]
+
+        escolhas.remove(menor)
+        caminho.append(menor[0])
+        caminho = caminho + grafo.A_star_search(menor[0], fim, escolhas)
+
+        if caminho[-1] == 0:
+            return caminho
+        else:
+            caminho.pop(-1)
+
+        return caminho
+
+    def busca_com_A_search(self, inicio, fim):
+        caminho = grafo.A_star_search(inicio, fim)
+        caminho.pop(-1)
+        return caminho
 
     def __str__(self):
         return '{}({})'.format(self.__class__.__name__, dict(self._grafo))
