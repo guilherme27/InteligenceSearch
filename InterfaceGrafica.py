@@ -64,8 +64,3 @@ bt1.place(x=380, y=29)
 
 janela.geometry("900x500+200+100")
 janela.mainloop()
-
-# esses prints sevem para printar o resultado no terminal, mesmo depois de executar a interface gráfica
-print("busca em Largura: ", grafo.busca_em_largura(vertice_inicial, vertice_final))
-print("busca em profundidade: ", grafo.busca_profunda(vertice_inicial, vertice_final))
-print("busca com A*: ", grafo.A_star_search(vertice_inicial, vertice_final))

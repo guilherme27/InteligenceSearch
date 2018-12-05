@@ -2,29 +2,6 @@ import heapq, csv
 import networkx as nx
 import matplotlib.pyplot as plt
 
-'''dicGrafo = {
-    "Arad":["Zerind", "Sibiu", "Timisoara"],
-    "Zerind":["Arad", "Oradea"],
-    "Sibiu":["Arad", "Oradea", "Fagaras", "Rimnicu-Vilcea"],
-    "Timisoara": ["Arad", "Lugoj"],
-    "Oradea": ["Zerind", "Sibiu"],
-    "Fagaras": ["Sibiu", "Bucharest"],
-    "Rimnicu-Vilcea": ["Sibiu", "Pitesti", "Craiova"],
-    "Lugoj": ["Timisoara", "Mehadia"],
-    "Bucharest": ["Fagaras", "Pitesti", "Urziceni", "Giurgiu"],
-    "Pitesti": ["Rimnicu-Vilcea", "Bucharest", "Craiova"],
-    "Craiova": ["Rimnicu-Vilcea", "Pitesti", "Dobretu"],
-    "Mehadia": ["Lugoj", "Dobretu"],
-    "Urziceni": ["Bucharest", "Hirsova", "Vaslui"],
-    "Giurgiu": ["Bucharest"],
-    "Dobretu": ["Mehadia", "Craiova"],
-    "Hirsova": ["Urziceni", "Eforie"],
-    "Vaslui": ["Urziceni", "Iasi"],
-    "Eforie": ["Hirsova"],
-    "Iasi": ["Vaslui", "Neamt"],
-    "Neamt": ["Iasi"]
-}'''
-
 def create_graph(roat):
     """ Criar grafo """
 
@@ -150,6 +127,8 @@ class Grafo(object):
         while fila:
             (vertice, caminho) = fila.pop(0)
             for prox in grafo[vertice] - set(caminho):
+                if inicio == fim:
+                    return caminho
                 if prox == fim:
                     return caminho + [prox]
                 else:
@@ -171,6 +150,10 @@ class Grafo(object):
 
         if inicio not in marcado:
             marcado.append(inicio)
+
+        if inicio == fim:
+            marcado.append(0)
+            return marcado
 
         for i in self._grafo[inicio]:
             if i not in marcado:
@@ -214,30 +197,6 @@ class Grafo(object):
                             else:
                                 return float(lista_linhas[coluna][linha])
         return 0
-
-    # def a_star_search(self, start, goal):
-    #     frontier = PriorityQueue()
-    #     frontier.put(start, 0)
-    #     came_from = {}
-    #     cost_so_far = {}
-    #     came_from[start] = None
-    #     cost_so_far[start] = 0
-    #
-    #     while not frontier.empty():
-    #         current = frontier.get()
-    #
-    #         if current == goal:
-    #             break
-    #
-    #         for next in grafo.get_neighbors(current):
-    #             new_cost = cost_so_far[current] + grafo.cost(current, next)
-    #             if next not in cost_so_far or new_cost < cost_so_far[next]:
-    #                 cost_so_far[next] = new_cost
-    #                 priority = new_cost + float(self.heuristica(goal, next))
-    #                 frontier.put(next, priority)
-    #                 came_from[next] = current
-    #
-    #     return list(came_from.keys())#, cost_so_far    # <-- descomente este trecho, caso queira exibir também os custos do caminho
 
     def A_star_search(self, inicio, fim, escolhas_param=None, marcados_param=None):
         if escolhas_param == None:
@@ -296,13 +255,3 @@ dicGrafo = create_graph("data\DicGrafo.csv")
 
 grafo = Grafo(dicGrafo, direcionado=True)
 grafo_nx = nx.Graph(nx.to_networkx_graph(dicGrafo))
-
-# alguns desses prints estão agora no arquivo InterfaceGrafica.py
-# print("busca em Largura: ", grafo.busca_em_largura("Arad", "Bucharest"))
-# print("busca em profundidade: ", grafo.busca_profunda("Arad", "Bucharest"))
-# print("busca em profundidade: ", grafo.busca_profunda("Arad", "Bucharest"))
-# print("busca em profundidade: ", grafo.busca_profunda("Arad", "Bucharest"))
-# print("busca com A*: ", grafo.a_star_search("Arad", "Bucharest"))
-# print(grafo._grafo,"\n")
-# print(grafo.get_vertices())
-# print(grafo.eh_conectado("Ar", "Pi"))
