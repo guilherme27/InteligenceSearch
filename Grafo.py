@@ -83,7 +83,7 @@ def plota_A_estrela(grafo_nx, inicio, fim):
     nx.draw_networkx_nodes(grafo_nx, pos, node_size=40, node_color='green')
     nx.draw_networkx_edges(grafo_nx, pos)
     nx.draw_networkx_labels(grafo_nx, pos)
-    paint_edges(grafo_nx, pos, grafo.a_star_search(inicio, fim), 'red')
+    paint_edges(grafo_nx, pos, grafo.busca_com_A_search(inicio, fim), 'red')
     plt.show()
 
 class PriorityQueue:
@@ -142,72 +142,25 @@ class Grafo(object):
 
 
 
-    def width_Search(self, inicio, fim, marcado_param=None, fila_param=None):
+    def width_Search(self,grafo, inicio, fim):
         """ Width Search"""
 
-        # marcados = [inicio]
-        # caminho = []
-        # if vertice_at not in marcados:
-
-        # while fila:
-        #     vertice = fila.pop(0)
-        #     caminho.append(vertice)
-        #     for i in self._grafo[vertice]:
-        #         if i not in marcados:
-        #             marcados.append(i)
-        #             fila.append(i)
-        #         if vertice == fim:
-        #             return caminho
-
-        caminho = []
-
-        if marcado_param == None:
-            marcado = []
-        else:
-            marcado = marcado_param
-
-        if fila_param == None:
-            fila = [inicio]
-        else:
-            fila = fila_param
-
-        if inicio not in caminho:
-            caminho.append(inicio)
-
-        if inicio not in marcado:
-            marcado.append(inicio)
-
-        #fila = self._grafo[inicio]
-
-        vertice = fila.pop(0)
-
-        if self._grafo[vertice] == marcado:
-            marcado = []
-            resultado = grafo.width_Search(vertice, fim, marcado, fila)
-            if resultado[-1] == 0:
-                return caminho + resultado
-            else:
-                caminho.remove(vertice)
-
-        for i in self._grafo[vertice]:
-            if i not in marcado:
-                marcado.append(i)
-                caminho.append(i)
-                fila.append(i)
-                if i == fim:
-                    caminho.append(0)
-                    return caminho
+        fila = [(inicio, [inicio])]
+        # grafo = set(dicGrafo)
+        while fila:
+            (vertice, caminho) = fila.pop(0)
+            for prox in grafo[vertice] - set(caminho):
+                if prox == fim:
+                    return caminho + [prox]
                 else:
-                    caminho.remove(i)
-                resultado = grafo.width_Search(fila[0], fim, marcado, fila)
-                if resultado[-1] == 0:
-                    return caminho + resultado
+                    fila.append((prox, caminho + [prox]))
 
-        return caminho
 
     def busca_em_largura(self, inicio, fim):
-        caminho = grafo.width_Search(inicio, fim)
-        caminho.pop(-1)
+        dicGrafoTemp = dicGrafo.copy()
+        for i in dicGrafo.keys():
+            dicGrafoTemp[i] = set(dicGrafoTemp[i])
+        caminho = list(grafo.width_Search(dicGrafoTemp, inicio, fim))
         return caminho
 
     def deep_Search(self, inicio, fim, marcados=None):
@@ -286,45 +239,53 @@ class Grafo(object):
     #
     #     return list(came_from.keys())#, cost_so_far    # <-- descomente este trecho, caso queira exibir também os custos do caminho
 
-    def A_star_search(self, inicio, fim, escolhas_param=None):
+    def A_star_search(self, inicio, fim, escolhas_param=None, marcados_param=None):
         if escolhas_param == None:
             escolhas = []
         else:
             escolhas = escolhas_param
 
+        if marcados_param == None:
+            marcados = []
+        else:
+            marcados = marcados_param
+
         caminho = []
+        marcados.append(inicio)
 
         if inicio == fim:
             caminho.append(fim)
             caminho.append(0)
             return caminho
 
+
         for i in grafo._grafo[inicio]:
-            escolha = []
-            escolha.append(i)
-            escolha.append(self.heuristica(i, fim) + self.custo(inicio, i))
-            escolhas.append(escolha)
+            if i not in marcados:
+                escolha = []
+                escolha.append(i)
+                escolha.append(self.heuristica(i, fim) + self.custo(inicio, i))
+                escolhas.append(escolha)
 
         menor = escolhas[0]
 
         for i in range(len(escolhas) - 1):
-            if escolhas[i + 1] != None:
-                if menor[1] > float(escolhas[i + 1][1]):
-                    menor = escolhas[i + 1]
+                if escolhas[i + 1] != None:
+                    if menor[1] > float(escolhas[i + 1][1]):
+                        menor = escolhas[i + 1]
 
         escolhas.remove(menor)
         caminho.append(menor[0])
-        caminho = caminho + grafo.A_star_search(menor[0], fim, escolhas)
+        caminho = caminho + grafo.A_star_search(menor[0], fim, escolhas, marcados)
 
         if caminho[-1] == 0:
             return caminho
-        else:
-            caminho.pop(-1)
 
         return caminho
 
     def busca_com_A_search(self, inicio, fim):
-        caminho = grafo.A_star_search(inicio, fim)
+        caminho = [inicio]
+        caminho = caminho + grafo.A_star_search(inicio, fim)
+        caminho.pop(-1)
         caminho.pop(-1)
         return caminho
 
