@@ -3,26 +3,31 @@ from tkinter.ttk import Combobox
 from Grafo import *
 
 grafo = Grafo(dicGrafo, direcionado=True)
-vertice_inicial = ""
-vertice_final = ""
 
 def bt_click():
     text_resultado_busca_em_largura.delete('1.0', END)
     text_resultado_busca_em_profundidade.delete('1.0', END)
     text_resultado_busca_com_A_estrela.delete('1.0', END)
 
-    text_resultado_busca_em_largura.insert(END, grafo.busca_em_largura(combo1.get(), combo2.get()))
-    text_resultado_busca_em_profundidade.insert(END, grafo.busca_profunda(combo1.get(), combo2.get()))
-    text_resultado_busca_com_A_estrela.insert(END, grafo.busca_com_A_search(combo1.get(), combo2.get()))
+    if combo1.get() in list(dicGrafo.keys()) and combo2.get() in list(dicGrafo.keys()):
 
-    plota_largura(grafo_nx, combo1.get(), combo2.get())
-    plota_profundidade(grafo_nx, combo1.get(), combo2.get())
-    plota_A_estrela(grafo_nx, combo1.get(), combo2.get())
+        text_resultado_busca_em_largura.insert(END, grafo.busca_em_largura(combo1.get(), combo2.get()))
+        text_resultado_busca_em_profundidade.insert(END, grafo.busca_profunda(combo1.get(), combo2.get()))
+        text_resultado_busca_com_A_estrela.insert(END, grafo.busca_com_A_search(combo1.get(), combo2.get()))
 
-    global vertice_inicial
-    global vertice_final
-    vertice_inicial = combo1.get()
-    vertice_final = combo2.get()
+        plota_largura(grafo_nx, combo1.get(), combo2.get())
+        plota_profundidade(grafo_nx, combo1.get(), combo2.get())
+        plota_A_estrela(grafo_nx, combo1.get(), combo2.get())
+
+    else:
+        popup = Tk()
+        popup.title("Erro")
+        message = Label(popup, text="Local não especificado no mapa.")
+        message.place(x=20, y=20)
+        bt_error = Button(popup, width=10, heigh=1, text="OK", command=popup.destroy)
+        bt_error.place(x=70, y=55)
+        popup.geometry("220x100+550+300")
+        popup.mainloop()
 
 janela = Tk()
 janela.title("SmartSearch")
@@ -62,5 +67,5 @@ text_resultado_busca_com_A_estrela.place(x=20, y=330)
 bt1 = Button(janela, width=10, heigh=2, text="Confirmar", command=bt_click)
 bt1.place(x=380, y=29)
 
-janela.geometry("900x500+200+100")
+janela.geometry("845x500+200+100")
 janela.mainloop()
